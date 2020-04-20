@@ -1,0 +1,11 @@
+meridian:
+  version: v1
+  address: localhost:8088
+  apollo: localhost:8083
+  db:
+    - 0.0.0.0:2379
+  instrument:
+    address: 0.0.0.0:4222
+    stopic: collector
+    collect: 15s
+    location: logs/
