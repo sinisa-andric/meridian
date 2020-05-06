@@ -14,6 +14,7 @@ type Config struct {
 	Address        string            `yaml:"address"`
 	Apollo         string            `yaml:"apollo"`
 	DB             []string          `yaml:"db"`
+	Cache          string            `yaml:"cache"`
 	InstrumentConf map[string]string `yaml:"instrument"`
 }
 

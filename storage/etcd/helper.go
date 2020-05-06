@@ -11,10 +11,26 @@ const (
 	labels = "labels"
 )
 
-// keyspace namespace namespaces/namespace
-// example namespaces/default
+// keyspace namespace namespaces/user_id:namespace
+// example namespaces/username:default
 // example data TODO: Think about data... maybe link to resource in other service
 // and by link i think key, to o delete when namespace is removed! And labes as well
+/*
+namespaces/labels/user_id:namespace -> [k:v, k:v]
+namespaces/user_id:namespace -> {data}
+*/
+
+func newNSKeyspace(userid, namespace string) string {
+	userNS := strings.Join([]string{userid, namespace}, ":")
+	return strings.Join([]string{ns, userNS}, "/")
+}
+
+func newNSLabelsKeyspace(userid, namespace string) string {
+	prefix := strings.Join([]string{ns, labels}, "/")
+	userNS := strings.Join([]string{userid, namespace}, ":")
+	s := []string{prefix, userNS}
+	return strings.Join(s, "/")
+}
 
 func nsKeyspace(namespace string) string {
 	return strings.Join([]string{ns, namespace}, "/")
@@ -46,8 +62,8 @@ func toString(n int64) string {
 	return strconv.FormatInt(n, 10)
 }
 
-func NSLabels() string {
-	return strings.Join([]string{ns, labels}, "/")
+func NSLabels(userid string) string {
+	return strings.Join([]string{ns, labels, userid}, "/")
 }
 
 func NSLabelsKey(name string) string {

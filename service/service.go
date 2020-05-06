@@ -6,7 +6,6 @@ import (
 	"github.com/c12s/meridian/helper"
 	"github.com/c12s/meridian/model"
 	"github.com/c12s/meridian/storage"
-	aPb "github.com/c12s/scheme/apollo"
 	cPb "github.com/c12s/scheme/celestial"
 	mPb "github.com/c12s/scheme/meridian"
 	sg "github.com/c12s/stellar-go"
@@ -21,40 +20,7 @@ type Server struct {
 	instrument map[string]string
 	db         storage.DB
 	apollo     string
-}
-
-func (s *Server) auth(ctx context.Context) (string, error) {
-	span, _ := sg.FromGRPCContext(ctx, "auth")
-	defer span.Finish()
-	fmt.Println(span)
-
-	token, err := helper.ExtractToken(ctx)
-	if err != nil {
-		span.AddLog(&sg.KV{"token error", err.Error()})
-		return "", err
-	}
-
-	client := NewApolloClient(s.apollo)
-	resp, err := client.Auth(
-		helper.AppendToken(
-			sg.NewTracedGRPCContext(ctx, span),
-			token,
-		),
-		&aPb.AuthOpt{
-			Data: map[string]string{"intent": "auth"},
-		},
-	)
-	if err != nil {
-		span.AddLog(&sg.KV{"apollo resp error", err.Error()})
-		return "", err
-	}
-
-	if !resp.Value {
-		span.AddLog(&sg.KV{"apollo.auth value", resp.Data["message"]})
-		return "", errors.New(resp.Data["message"])
-	}
-
-	return token, nil
+	meridian   string
 }
 
 func (s *Server) List(ctx context.Context, req *cPb.ListReq) (*cPb.ListResp, error) {
@@ -62,9 +28,21 @@ func (s *Server) List(ctx context.Context, req *cPb.ListReq) (*cPb.ListResp, err
 	defer span.Finish()
 	fmt.Println(span)
 
-	token, err := s.auth(ctx)
+	token, err := helper.ExtractToken(ctx)
 	if err != nil {
-		span.AddLog(&sg.KV{"apollo resp error", err.Error()})
+		span.AddLog(&sg.KV{"token error", err.Error()})
+		return nil, err
+	}
+
+	err = s.auth(ctx, listOpt(req, token))
+	if err != nil {
+		span.AddLog(&sg.KV{"auth error", err.Error()})
+		return nil, err
+	}
+
+	_, err = s.checkNS(ctx, req.Extras["user"], req.Extras["namespace"])
+	if err != nil {
+		span.AddLog(&sg.KV{"check ns error", err.Error()})
 		return nil, err
 	}
 
@@ -87,17 +65,29 @@ func (s *Server) Mutate(ctx context.Context, req *cPb.MutateReq) (*cPb.MutateRes
 	defer span.Finish()
 	fmt.Println(span)
 
-	token, err := s.auth(ctx)
+	token, err := helper.ExtractToken(ctx)
 	if err != nil {
-		span.AddLog(&sg.KV{"apollo resp error", err.Error()})
+		span.AddLog(&sg.KV{"token error", err.Error()})
 		return nil, err
+	}
+	fmt.Println("{{TOKEN MUTATE MERIDIAN}}", token)
+
+	err = s.auth(ctx, mutateOpt(req, token))
+	if err != nil {
+		span.AddLog(&sg.KV{"auth error", err.Error()})
+		return nil, err
+	}
+
+	ns, err := s.checkNS(ctx, req.Mutate.UserId, req.Mutate.Extras["namespace"])
+	if ns != "" {
+		span.AddLog(&sg.KV{"check ns error", "Namespace already exis"})
+		return nil, errors.New("Namespace already exis")
 	}
 
 	err, rsp := s.db.Mutate(helper.AppendToken(
 		sg.NewTracedGRPCContext(ctx, span),
 		token,
-	), req,
-	)
+	), req)
 	if err != nil {
 		span.AddLog(&sg.KV{"namespace mutate error", err.Error()})
 		return nil, err
@@ -114,10 +104,13 @@ func (s *Server) Exists(ctx context.Context, req *mPb.NSReq) (*mPb.NSResp, error
 		sg.NewTracedGRPCContext(ctx, span), req,
 	)
 	if err != nil {
+		fmt.Println("{{service.Exists err != nil}}")
 		span.AddLog(&sg.KV{"namespace exists error", err.Error()})
 		return nil, err
 	}
-	return rsp, err
+
+	fmt.Println("{{service.Exists err == nil}}")
+	return rsp, nil
 }
 
 func (s *Server) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) {
@@ -125,11 +118,17 @@ func (s *Server) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp
 	defer span.Finish()
 	fmt.Println(span)
 
-	token, err := s.auth(ctx)
+	token, err := helper.ExtractToken(ctx)
 	if err != nil {
-		span.AddLog(&sg.KV{"apollo resp error", err.Error()})
+		span.AddLog(&sg.KV{"token error", err.Error()})
 		return err, nil
 	}
+
+	// _, err = s.checkNS(ctx, req.Mutate.UserId, req.Mutate.Namespace)
+	// if err != nil {
+	// 	span.AddLog(&sg.KV{"check ns error", err.Error()})
+	// 	return err, nil
+	// }
 
 	err, rsp := s.db.Delete(
 		helper.AppendToken(
@@ -172,12 +171,6 @@ func Run(db storage.DB, conf *model.Config) {
 		return
 	}
 	go c.Start(ctx, 15*time.Second)
-
-	err = db.Init()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 
 	fmt.Println("MeridianService RPC Started")
 	mPb.RegisterMeridianServiceServer(server, meridianServer)
