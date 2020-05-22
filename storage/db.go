@@ -11,5 +11,4 @@ type DB interface {
 	Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.MutateResp)
 	Exists(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp)
 	Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp)
-	Init() error
 }
