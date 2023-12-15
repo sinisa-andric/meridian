@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+	"time"
+
 	"github.com/c12s/meridian/model"
 	"github.com/c12s/meridian/service"
 	"github.com/c12s/meridian/storage/etcd"
 	"github.com/c12s/meridian/storage/redis"
-	"log"
-	"time"
 )
 
 func main() {
