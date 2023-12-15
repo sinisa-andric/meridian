@@ -15,7 +15,7 @@ import (
 	mPb "github.com/c12s/scheme/meridian"
 	sg "github.com/c12s/stellar-go"
 	"github.com/coreos/etcd/clientv3"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 type ETCD struct {
@@ -51,16 +51,16 @@ func (e *ETCD) get(ctx context.Context, key string) (string, int64, string, stri
 	chspan := span.Child("etcd.get")
 	gresp, err := e.kv.Get(ctx, key)
 	if err != nil {
-		chspan.AddLog(&sg.KV{"etcd get error", err.Error()})
+		chspan.AddLog(&sg.KV{Key: "etcd get error", Value: err.Error()})
 		return "", 0, "", ""
 	}
 	go chspan.Finish()
 
 	for _, item := range gresp.Kvs {
 		nsTask := &rPb.Task{}
-		err = proto.Unmarshal(item.Value, nsTask)
+		err = proto.Unmarshal(item.Value, nsTask.ProtoReflect())
 		if err != nil {
-			span.AddLog(&sg.KV{"unmarshall etcd get error", err.Error()})
+			span.AddLog(&sg.KV{Key: "unmarshall etcd get error", Value: err.Error()})
 			return "", 0, "", ""
 		}
 		return nsTask.Namespace, nsTask.Timestamp, nsTask.Extras["namespace"], nsTask.Extras["labels"]
@@ -85,7 +85,7 @@ func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.L
 		gresp, err := e.kv.Get(ctx, NSLabels(user), clientv3.WithPrefix(),
 			clientv3.WithSort(clientv3.SortByKey, clientv3.SortAscend))
 		if err != nil {
-			chspan.AddLog(&sg.KV{"etcd.get error", err.Error()})
+			chspan.AddLog(&sg.KV{Key: "etcd.get error", Value: err.Error()})
 			return err, nil
 		}
 		go chspan.Finish()
@@ -146,16 +146,16 @@ func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.Muta
 	labels := task.Extras["labels"]
 
 	nsKey := newNSKeyspace(task.UserId, namespace)
-	nsData, merr := proto.Marshal(task)
+	nsData, merr := proto.Marshal(task.ProtoReflect())
 	if merr != nil {
-		span.AddLog(&sg.KV{"etcd.put key error", merr.Error()})
+		span.AddLog(&sg.KV{Key: "etcd.put key error", Value: merr.Error()})
 		return merr, nil
 	}
 
 	chspan1 := span.Child("etcd.put key")
 	_, err := e.kv.Put(ctx, nsKey, string(nsData))
 	if err != nil {
-		chspan1.AddLog(&sg.KV{"etcd.put key error", err.Error()})
+		chspan1.AddLog(&sg.KV{Key: "etcd.put key error", Value: err.Error()})
 		return err, nil
 	}
 	chspan1.Finish()
@@ -164,7 +164,7 @@ func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.Muta
 	lKey := newNSLabelsKeyspace(task.UserId, namespace)
 	_, err = e.kv.Put(ctx, lKey, labels)
 	if err != nil {
-		chspan2.AddLog(&sg.KV{"etcd.put labels error", err.Error()})
+		chspan2.AddLog(&sg.KV{Key: "etcd.put labels error", Value: err.Error()})
 		return err, nil
 	}
 	chspan2.Finish()
@@ -193,7 +193,7 @@ func (e *ETCD) Exists(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 	chspan := span.Child("etcd.get")
 	gresp, err := e.kv.Get(ctx, key)
 	if err != nil {
-		chspan.AddLog(&sg.KV{"etcd get error", err.Error()})
+		chspan.AddLog(&sg.KV{Key: "etcd get error", Value: err.Error()})
 		return err, nil
 	}
 	go chspan.Finish()
@@ -223,7 +223,7 @@ func (e *ETCD) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 	chspan := span.Child("etcd.delete")
 	gresp, err := e.kv.Delete(ctx, key)
 	if err != nil {
-		chspan.AddLog(&sg.KV{"etcd delete error", err.Error()})
+		chspan.AddLog(&sg.KV{Key: "etcd delete error", Value: err.Error()})
 		return err, nil
 	}
 	go chspan.Finish()
@@ -232,7 +232,7 @@ func (e *ETCD) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 	chspan1 := span.Child("etcd.delete")
 	_, err = e.kv.Delete(ctx, lkey)
 	if err != nil {
-		chspan1.AddLog(&sg.KV{"etcd delete error", err.Error()})
+		chspan1.AddLog(&sg.KV{Key: "etcd delete error", Value: err.Error()})
 		return err, nil
 	}
 	go chspan1.Finish()
