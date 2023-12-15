@@ -1,8 +1,9 @@
 package model
 
 import (
+	"os"
+
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 )
 
 type Meridian struct {
@@ -24,7 +25,7 @@ func ConfigFile(n ...string) (*Config, error) {
 		path = n[0]
 	}
 
-	yamlFile, err := ioutil.ReadFile(path)
+	yamlFile, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

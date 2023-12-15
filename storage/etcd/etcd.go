@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/c12s/meridian/model"
 	"github.com/c12s/meridian/storage"
 	cPb "github.com/c12s/scheme/celestial"
@@ -12,9 +16,6 @@ import (
 	sg "github.com/c12s/stellar-go"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/golang/protobuf/proto"
-	"sort"
-	"strconv"
-	"time"
 )
 
 type ETCD struct {
@@ -167,7 +168,7 @@ func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.Muta
 		return err, nil
 	}
 	chspan2.Finish()
-	return nil, &cPb.MutateResp{"Namespace added."}
+	return nil, &cPb.MutateResp{Error: "Namespace added."}
 }
 
 func (e *ETCD) Exists(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) {
