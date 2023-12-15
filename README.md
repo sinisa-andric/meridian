@@ -1,14 +1,15 @@
 README.md
 
 
-# Meridian Namespace
+# Meridian Namespace Service
 
-[![GitHub Stars](https://img.shields.io/github/stars/yourusername/equine-tracker)](https://github.com/yourusername/equine-tracker/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/yourusername/equine-tracker)](https://github.com/yourusername/equine-tracker/network/members)
-[![GitHub Issues](https://img.shields.io/github/issues/yourusername/equine-tracker)](https://github.com/yourusername/equine-tracker/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yourusername/equine-tracker)](https://github.com/yourusername/equine-tracker/pulls)
+[![GitHub Stars](https://img.shields.io/github/stars/sinisa-andric/meridian)](https://github.com/sinisa-andric/meridian/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/sinisa-andric/meridian)](https://github.com/sinisa-andric/meridian/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/sinisa-andric/meridian)](https://github.com/sinisa-andric/meridian/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/sinisa-andric/meridian)](https://github.com/sinisa-andric/meridian/pulls)
 
 ## Table of Contents
+
 
 1. [Introduction](#introduction)
 2. [Features](#features)
