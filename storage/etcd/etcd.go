@@ -14,7 +14,8 @@ import (
 	rPb "github.com/c12s/scheme/core"
 	mPb "github.com/c12s/scheme/meridian"
 	sg "github.com/c12s/stellar-go"
-	"github.com/coreos/etcd/clientv3"
+	"go.etcd.io/etcd/clientv3"
+
 	"google.golang.org/protobuf/proto"
 )
 
@@ -25,10 +26,12 @@ type ETCD struct {
 }
 
 func New(conf *model.Config, cache storage.Cacher, timeout time.Duration) (*ETCD, error) {
-	cli, err := clientv3.New(clientv3.Config{
-		DialTimeout: timeout,
-		Endpoints:   conf.DB,
-	})
+	cli, err := clientv3.New(
+		clientv3.Config{
+			DialTimeout: timeout,
+			Endpoints:   conf.DB,
+		},
+	)
 
 	if err != nil {
 		return nil, err

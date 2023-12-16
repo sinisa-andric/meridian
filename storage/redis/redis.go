@@ -2,8 +2,10 @@ package redis
 
 import (
 	"encoding/json"
-	"github.com/go-redis/redis"
+
 	"time"
+
+	redis "github.com/redis/go-redis/v9"
 )
 
 type RedisCache struct {
@@ -15,7 +17,7 @@ func New(address string) (*RedisCache, error) {
 		Addr: address,
 	})
 
-	_, err := client.Ping().Result()
+	_, err := client.Ping(nil).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +28,7 @@ func New(address string) (*RedisCache, error) {
 }
 
 func (r *RedisCache) Get(key string) (interface{}, error) {
-	return r.client.Get(key).Result()
+	return r.client.Get(nil, key).Result()
 }
 
 func (r *RedisCache) Put(key string, value interface{}, ttl time.Duration) error {
@@ -34,5 +36,7 @@ func (r *RedisCache) Put(key string, value interface{}, ttl time.Duration) error
 	if err != nil {
 		return err
 	}
-	return r.client.Set(key, json, time.Duration(ttl)*time.Second).Err()
+
+	ret := r.client.Set(nil, key, json, time.Duration(ttl)*time.Second).Err()
+	return ret
 }
