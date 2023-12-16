@@ -61,7 +61,7 @@ func (e *ETCD) get(ctx context.Context, key string) (string, int64, string, stri
 
 	for _, item := range gresp.Kvs {
 		nsTask := &rPb.Task{}
-		err = proto.Unmarshal(item.Value, nsTask.ProtoReflect())
+		err = proto.Unmarshal(item.Value, nsTask)
 		if err != nil {
 			span.AddLog(&sg.KV{Key: "unmarshall etcd get error", Value: err.Error()})
 			return "", 0, "", ""
@@ -149,7 +149,7 @@ func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.Muta
 	labels := task.Extras["labels"]
 
 	nsKey := newNSKeyspace(task.UserId, namespace)
-	nsData, merr := proto.Marshal(task.ProtoReflect())
+	nsData, merr := proto.Marshal(task)
 	if merr != nil {
 		span.AddLog(&sg.KV{Key: "etcd.put key error", Value: merr.Error()})
 		return merr, nil
