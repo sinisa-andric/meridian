@@ -5,7 +5,7 @@ meridian:
   db:
     - 127.0.0.1:2379
   instrument:
-    address: 127.0.0.1:4222
+    address: 0.0.0.0:4222
     stopic: collector
     collect: 15s
     location: logs/
