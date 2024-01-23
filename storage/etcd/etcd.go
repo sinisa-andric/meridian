@@ -2,7 +2,6 @@ package etcd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -11,12 +10,13 @@ import (
 	"github.com/c12s/meridian/model"
 	"github.com/c12s/meridian/storage"
 	cPb "github.com/c12s/scheme/celestial"
-	rPb "github.com/c12s/scheme/core"
+	"github.com/c12s/scheme/core"
 	mPb "github.com/c12s/scheme/meridian"
 	sg "github.com/c12s/stellar-go"
 	"go.etcd.io/etcd/clientv3"
 
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type ETCD struct {
@@ -46,7 +46,7 @@ func New(conf *model.Config, cache storage.Cacher, timeout time.Duration) (*ETCD
 
 func (db *ETCD) Close() { db.client.Close() }
 
-func (e *ETCD) get(ctx context.Context, key string) (string, int64, string, string) {
+func (e *ETCD) Get(ctx context.Context, key string) (string, int64, string, string) {
 	span, _ := sg.FromGRPCContext(ctx, "get")
 	defer span.Finish()
 	fmt.Println(span)
@@ -59,19 +59,29 @@ func (e *ETCD) get(ctx context.Context, key string) (string, int64, string, stri
 	}
 	go chspan.Finish()
 
+	var namespace, extrasNS, extrasLabel string
+	var timestamp int64
 	for _, item := range gresp.Kvs {
-		nsTask := &rPb.Task{}
+
+		nsTask := &Task{&core.Task{}}
+
 		err = proto.Unmarshal(item.Value, nsTask)
 		if err != nil {
 			span.AddLog(&sg.KV{Key: "unmarshall etcd get error", Value: err.Error()})
 			return "", 0, "", ""
 		}
-		return nsTask.Namespace, nsTask.Timestamp, nsTask.Extras["namespace"], nsTask.Extras["labels"]
+
+		namespace = nsTask.Namespace
+		timestamp = nsTask.Timestamp
+		extrasNS = nsTask.Extras["namespace"]
+		extrasLabel = nsTask.Extras["labels"]
+
 	}
-	return "", 0, "", ""
+
+	return namespace, timestamp, extrasNS, extrasLabel
 }
 
-func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.ListResp) {
+func (e *ETCD) List(ctx context.Context, extra map[string]string) (*cPb.ListResp, error) {
 	span, _ := sg.FromGRPCContext(ctx, "list")
 	defer span.Finish()
 	fmt.Println(span)
@@ -89,7 +99,7 @@ func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.L
 			clientv3.WithSort(clientv3.SortByKey, clientv3.SortAscend))
 		if err != nil {
 			chspan.AddLog(&sg.KV{Key: "etcd.get error", Value: err.Error()})
-			return err, nil
+			return nil, err
 		}
 		go chspan.Finish()
 
@@ -102,7 +112,7 @@ func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.L
 			switch cmp {
 			case "all":
 				if len(ls) == len(els) && Compare(ls, els, true) {
-					ns, timestamp, name, labels := e.get(sg.NewTracedGRPCContext(ctx, span), newKey)
+					ns, timestamp, name, labels := e.Get(sg.NewTracedGRPCContext(ctx, span), newKey)
 					if ns != "" {
 						data.Data["namespace"] = ns
 						data.Data["age"] = strconv.FormatInt(timestamp, 10)
@@ -113,7 +123,7 @@ func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.L
 				}
 			case "any":
 				if Compare(ls, els, false) {
-					ns, timestamp, name, labels := e.get(sg.NewTracedGRPCContext(ctx, span), newKey)
+					ns, timestamp, name, labels := e.Get(sg.NewTracedGRPCContext(ctx, span), newKey)
 					if ns != "" {
 						data.Data["namespace"] = ns
 						data.Data["age"] = strconv.FormatInt(timestamp, 10)
@@ -127,7 +137,7 @@ func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.L
 	} else {
 		data := &cPb.Data{Data: map[string]string{}}
 		nsKey := newNSKeyspace(user, name)
-		ns, timestamp, name, labels := e.get(sg.NewTracedGRPCContext(ctx, span), nsKey)
+		ns, timestamp, name, labels := e.Get(sg.NewTracedGRPCContext(ctx, span), nsKey)
 		if ns != "" {
 			data.Data["namespace"] = ns
 			data.Data["age"] = strconv.FormatInt(timestamp, 10)
@@ -136,15 +146,16 @@ func (e *ETCD) List(ctx context.Context, extra map[string]string) (error, *cPb.L
 		}
 		datas = append(datas, data)
 	}
-	return nil, &cPb.ListResp{Data: datas}
+	return &cPb.ListResp{Data: datas}, nil
 }
 
-func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.MutateResp) {
+func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (*cPb.MutateResp, error) {
 	span, _ := sg.FromGRPCContext(ctx, "mutate")
 	defer span.Finish()
 	fmt.Println(span)
 
-	task := req.Mutate
+	//task := req.Mutate
+	task := &Task{&core.Task{}}
 	namespace := task.Extras["namespace"]
 	labels := task.Extras["labels"]
 
@@ -152,14 +163,14 @@ func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.Muta
 	nsData, merr := proto.Marshal(task)
 	if merr != nil {
 		span.AddLog(&sg.KV{Key: "etcd.put key error", Value: merr.Error()})
-		return merr, nil
+		return nil, merr
 	}
 
 	chspan1 := span.Child("etcd.put key")
 	_, err := e.kv.Put(ctx, nsKey, string(nsData))
 	if err != nil {
 		chspan1.AddLog(&sg.KV{Key: "etcd.put key error", Value: err.Error()})
-		return err, nil
+		return nil, err
 	}
 	chspan1.Finish()
 
@@ -168,13 +179,13 @@ func (e *ETCD) Mutate(ctx context.Context, req *cPb.MutateReq) (error, *cPb.Muta
 	_, err = e.kv.Put(ctx, lKey, labels)
 	if err != nil {
 		chspan2.AddLog(&sg.KV{Key: "etcd.put labels error", Value: err.Error()})
-		return err, nil
+		return nil, err
 	}
 	chspan2.Finish()
-	return nil, &cPb.MutateResp{Error: "Namespace added."}
+	return &cPb.MutateResp{Error: "Namespace added."}, nil
 }
 
-func (e *ETCD) Exists(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) {
+func (e *ETCD) Exists(ctx context.Context, req *mPb.NSReq) (*mPb.NSResp, error) {
 	span, _ := sg.FromGRPCContext(ctx, "exists")
 	defer span.Finish()
 	fmt.Println(span)
@@ -186,18 +197,18 @@ func (e *ETCD) Exists(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 	_, err := e.cache.Get(key)
 	if err == nil {
 		fmt.Println("EXISTS CACHE HIT")
-		return nil, &mPb.NSResp{
+		return &mPb.NSResp{
 			Extras: map[string]string{
 				"exists": req.Name,
 			},
-		}
+		}, nil
 	}
 
 	chspan := span.Child("etcd.get")
 	gresp, err := e.kv.Get(ctx, key)
 	if err != nil {
 		chspan.AddLog(&sg.KV{Key: "etcd get error", Value: err.Error()})
-		return err, nil
+		return nil, err
 	}
 	go chspan.Finish()
 
@@ -205,17 +216,18 @@ func (e *ETCD) Exists(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 		e.cache.Put(key, true, 10*time.Minute)
 		fmt.Println("EXISTS CACHEd")
 
-		return nil, &mPb.NSResp{
+		return &mPb.NSResp{
 			Extras: map[string]string{
 				"exists": req.Name,
 			},
-		}
+		}, nil
 	}
 	fmt.Println("NAMESPACE NOT EXISTING")
-	return errors.New(fmt.Sprintf("%s do not exists...", req.Name)), nil
+	err = fmt.Errorf(fmt.Sprintf("%s do not exists...", req.Name))
+	return nil, err
 }
 
-func (e *ETCD) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) {
+func (e *ETCD) Delete(ctx context.Context, req *mPb.NSReq) (*mPb.NSResp, error) {
 	span, _ := sg.FromGRPCContext(ctx, "delete")
 	defer span.Finish()
 	fmt.Println(span)
@@ -227,7 +239,7 @@ func (e *ETCD) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 	gresp, err := e.kv.Delete(ctx, key)
 	if err != nil {
 		chspan.AddLog(&sg.KV{Key: "etcd delete error", Value: err.Error()})
-		return err, nil
+		return nil, err
 	}
 	go chspan.Finish()
 
@@ -236,21 +248,34 @@ func (e *ETCD) Delete(ctx context.Context, req *mPb.NSReq) (error, *mPb.NSResp) 
 	_, err = e.kv.Delete(ctx, lkey)
 	if err != nil {
 		chspan1.AddLog(&sg.KV{Key: "etcd delete error", Value: err.Error()})
-		return err, nil
+		return nil, err
 	}
 	go chspan1.Finish()
 
 	if gresp.Deleted > 0 {
-		return nil, &mPb.NSResp{
+		return &mPb.NSResp{
 			Extras: map[string]string{
 				"deleted": req.Name,
 			},
-		}
+		}, nil
 	}
 
-	return nil, &mPb.NSResp{
+	return &mPb.NSResp{
 		Extras: map[string]string{
 			"deleted": "",
 		},
-	}
+	}, nil
+}
+
+type Task struct {
+	*core.Task
+}
+
+// ProtoReflect implements protoreflect.ProtoMessage interface
+// func (t *Task) ProtoReflect() protoreflect.Message {
+// 	return t.Task.ProtoReflect()
+// }
+
+func (t *Task) ProtoReflect() protoreflect.Message {
+	return protoreflect.ValueOf(t.Task).Interface().(protoreflect.Message)
 }

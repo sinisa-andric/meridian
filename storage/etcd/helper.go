@@ -2,7 +2,6 @@ package etcd
 
 import (
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -58,9 +57,9 @@ func join(sep string, parts []string) string {
 	return strings.Join(parts, sep)
 }
 
-func toString(n int64) string {
-	return strconv.FormatInt(n, 10)
-}
+// func toString(n int64) string {
+// 	return strconv.FormatInt(n, 10)
+// }
 
 func NSLabels(userid string) string {
 	return strings.Join([]string{ns, labels, userid}, "/")
