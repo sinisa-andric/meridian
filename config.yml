@@ -4,6 +4,7 @@ meridian:
   apollo: localhost:8083
   db:
     - 127.0.0.1:2379
+  cache: something 
   instrument:
     address: 0.0.0.0:4222
     stopic: collector
