@@ -1,9 +1,7 @@
 meridian:
-  version: v2
+  version: v3
   address: localhost:8088
-  apollo: localhost:8083
-  db:
-    - localhost:2379
+  db: localhost:2379
   cache: localhost:6379 
   instrument:
     address: localhost:4222
