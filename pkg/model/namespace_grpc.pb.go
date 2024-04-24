@@ -33,14 +33,14 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NameSpaceServiceClient interface {
-	SayHi(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	Check(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	Create(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	Read(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	Update(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	Delete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	SoftDelete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
-	Describe(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error)
+	SayHi(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	Check(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	Create(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	Read(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	Update(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	Delete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	SoftDelete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
+	Describe(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error)
 }
 
 type nameSpaceServiceClient struct {
@@ -51,8 +51,8 @@ func NewNameSpaceServiceClient(cc grpc.ClientConnInterface) NameSpaceServiceClie
 	return &nameSpaceServiceClient{cc}
 }
 
-func (c *nameSpaceServiceClient) SayHi(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) SayHi(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_SayHi_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -60,8 +60,8 @@ func (c *nameSpaceServiceClient) SayHi(ctx context.Context, in *NameSpaceRequest
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) Check(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) Check(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_Check_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -69,8 +69,8 @@ func (c *nameSpaceServiceClient) Check(ctx context.Context, in *NameSpaceRequest
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) Create(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) Create(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_Create_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -78,8 +78,8 @@ func (c *nameSpaceServiceClient) Create(ctx context.Context, in *NameSpaceReques
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) Read(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) Read(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_Read_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -87,8 +87,8 @@ func (c *nameSpaceServiceClient) Read(ctx context.Context, in *NameSpaceRequest,
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) Update(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) Update(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_Update_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -96,8 +96,8 @@ func (c *nameSpaceServiceClient) Update(ctx context.Context, in *NameSpaceReques
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) Delete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) Delete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_Delete_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -105,8 +105,8 @@ func (c *nameSpaceServiceClient) Delete(ctx context.Context, in *NameSpaceReques
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) SoftDelete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) SoftDelete(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_SoftDelete_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -114,8 +114,8 @@ func (c *nameSpaceServiceClient) SoftDelete(ctx context.Context, in *NameSpaceRe
 	return out, nil
 }
 
-func (c *nameSpaceServiceClient) Describe(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NamespaceResponse, error) {
-	out := new(NamespaceResponse)
+func (c *nameSpaceServiceClient) Describe(ctx context.Context, in *NameSpaceRequest, opts ...grpc.CallOption) (*NameSpaceResponse, error) {
+	out := new(NameSpaceResponse)
 	err := c.cc.Invoke(ctx, NameSpaceService_Describe_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -127,14 +127,14 @@ func (c *nameSpaceServiceClient) Describe(ctx context.Context, in *NameSpaceRequ
 // All implementations must embed UnimplementedNameSpaceServiceServer
 // for forward compatibility
 type NameSpaceServiceServer interface {
-	SayHi(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	Check(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	Create(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	Read(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	Update(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	Delete(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	SoftDelete(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
-	Describe(context.Context, *NameSpaceRequest) (*NamespaceResponse, error)
+	SayHi(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	Check(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	Create(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	Read(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	Update(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	Delete(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	SoftDelete(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
+	Describe(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error)
 	mustEmbedUnimplementedNameSpaceServiceServer()
 }
 
@@ -142,28 +142,28 @@ type NameSpaceServiceServer interface {
 type UnimplementedNameSpaceServiceServer struct {
 }
 
-func (UnimplementedNameSpaceServiceServer) SayHi(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) SayHi(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHi not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) Check(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) Check(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) Create(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) Create(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) Read(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) Read(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) Update(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) Update(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) Delete(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) Delete(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) SoftDelete(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) SoftDelete(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SoftDelete not implemented")
 }
-func (UnimplementedNameSpaceServiceServer) Describe(context.Context, *NameSpaceRequest) (*NamespaceResponse, error) {
+func (UnimplementedNameSpaceServiceServer) Describe(context.Context, *NameSpaceRequest) (*NameSpaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Describe not implemented")
 }
 func (UnimplementedNameSpaceServiceServer) mustEmbedUnimplementedNameSpaceServiceServer() {}
