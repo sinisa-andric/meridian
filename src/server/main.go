@@ -18,15 +18,20 @@ func (s *server) SayHi(ctx context.Context, in *namespace.NameSpaceRequest) (*na
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":9001")
+
+	listen, err := net.Listen("tcp", ":9001")
 	if err != nil {
 		log.Fatalf("failed to listen on port 9001: %v", err)
 	}
 
 	s := grpc.NewServer()
+
 	namespace.RegisterNameSpaceServiceServer(s, &server{})
-	log.Printf("gRPC server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+
+	log.Printf("gRPC server listening at %v", listen.Addr())
+
+	if err := s.Serve(listen); err != nil {
 		log.Fatalf("failed to register server %v", err)
 	}
+
 }
