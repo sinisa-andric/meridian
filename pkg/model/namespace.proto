@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/sinisa-andric/meridian/pkg/model";
+
+package model;
+
+service NameSpaceService {
+  rpc SayHi(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc Check(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc Create(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc Read(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc Update(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc Delete(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc SoftDelete(NameSpaceRequest) returns (NamespaceResponse) {}
+  rpc Describe(NameSpaceRequest) returns (NamespaceResponse) {}
+}
+
+message NameSpaceRequest {
+    string data = 1;
+}
+
+message NamespaceResponse {
+  string data = 1;
+}
