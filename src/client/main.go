@@ -25,7 +25,7 @@ func main() {
 
 	response, err := c.SayHi(ctx, &namespace.NameSpaceRequest{})
 	if err != nil {
-		log.Fatalf("error calling function SayHello: %v", err)
+		log.Fatalf("error calling function SayHi: %v", err)
 	}
 
 	log.Printf("Response from gRPC server's SayHi function: %s", response.GetData())
