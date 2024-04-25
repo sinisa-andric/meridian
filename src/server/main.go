@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
 
@@ -11,10 +10,6 @@ import (
 
 type server struct {
 	namespace.UnimplementedNameSpaceServiceServer
-}
-
-func (s *server) SayHi(ctx context.Context, in *namespace.NameSpaceRequest) (*namespace.NameSpaceResponse, error) {
-	return &namespace.NameSpaceResponse{Data: "Hi! "}, nil
 }
 
 func main() {
